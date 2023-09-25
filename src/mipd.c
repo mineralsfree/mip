@@ -98,6 +98,8 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
     if (strcmp(unix_adr, "c") == 0) {
         /* client mode */
         /* Send greeting to the server */
+        printf(" Send greeting to the server \n");
+
         uint8_t broadcast[] = ETH_DST_MAC;
         send_hip_packet(&local_if, local_if.addr[0].sll_addr, broadcast,
                         local_if.local_hip_addr, 0xff, "hi");
@@ -108,6 +110,7 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
         if (rc == -1) {
             perror("epoll_wait");
         } else if (events->data.fd == raw_sock) {
+            printf("Recieved a packet \n");
             rc = handle_mip_packet(&local_if, unix_adr);
             if (rc < 0) {
                 perror("handle_hip_packet");
