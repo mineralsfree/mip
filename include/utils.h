@@ -11,23 +11,23 @@
 struct ifs_data {
     struct sockaddr_ll addr[MAX_IF];
     int rsock;
-    uint8_t local_hip_addr;
+    uint8_t local_mip_addr;
     int ifn;
 };
 int create_raw_socket(void);
 
-int epoll_add_sock(int sd);
-
+int epoll_add_sock(int raw_socket, int unix_socket);
+int add_to_epoll_table(int efd, int sd);
 void get_mac_from_ifaces(struct ifs_data *);
 
 void print_mac_addr(uint8_t *addr, size_t len);
 int handle_mip_packet(struct ifs_data *ifs, const char *app_mode);
 
-int send_hip_packet(struct ifs_data *ifs,
+int send_mip_packet(struct ifs_data *ifs,
                     uint8_t *src_mac_addr,
                     uint8_t *dst_mac_addr,
-                    uint8_t src_hip_addr,
-                    uint8_t dst_hip_addr,
+                    uint8_t src_mip_addr,
+                    uint8_t dst_mip_addr,
                     const char *sdu);
 
 void init_ifs(struct ifs_data *, int);

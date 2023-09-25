@@ -12,11 +12,9 @@ int main(int argc, char *argv[]) {
     while ((opt = getopt(argc, argv, "dh")) != -1) {
         switch (opt) {
             case 'd':
-                /* Running in server mode */
                 dflag = 1;
                 break;
             case 'h':
-                /* Running in client mode */
                 hflag = 1;
                 break;
             default:
@@ -39,7 +37,7 @@ int main(int argc, char *argv[]) {
     if (!dflag) {
         freopen("/dev/null", "w", stdout);
     }
-    printf("Starting the MIP daemon");
+    printf("Starting the MIP daemon\n");
     mipd(socketUpper, (uint8_t)mip_addr);
 
     return 0;

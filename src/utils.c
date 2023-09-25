@@ -16,7 +16,7 @@
 int create_raw_socket(void)
 {
     int sd;
-    short unsigned int protocol = ETH_P_MIP;
+    short unsigned int protocol = 0xFFFF;
 
     /* Set up a raw AF_PACKET socket without ethertype filtering */
     sd = socket(AF_PACKET, SOCK_RAW, htons(protocol));
@@ -80,11 +80,22 @@ void init_ifs(struct ifs_data *ifs, int rsock)
     srand(time(0));
     rand_mip = (uint8_t)(rand() % 256);
 
-    ifs->local_hip_addr = rand_mip;
+    ifs->local_mip_addr = rand_mip;
 }
-int epoll_add_sock(int sd)
-{
+int add_to_epoll_table(int efd, int sd){
     struct epoll_event ev;
+
+    ev.events = EPOLLIN;
+    ev.data.fd = sd;
+    if (epoll_ctl(efd, EPOLL_CTL_ADD, sd, &ev) == -1) {
+        perror("epoll_ctl: unix_sock");
+        exit(EXIT_FAILURE);
+    }
+    return efd;
+}
+int epoll_add_sock(int raw_socket, int unix_socket)
+{
+    struct epoll_event ev, unix_ev;
 
     /* Create epoll table */
     int epollfd = epoll_create1(0);
@@ -92,15 +103,19 @@ int epoll_add_sock(int sd)
         perror("epoll_create1");
         exit(EXIT_FAILURE);
     }
-
+    unix_ev.events = EPOLLIN;
+    unix_ev.data.fd = unix_socket;
     /* Add RAW socket to epoll table */
     ev.events = EPOLLIN;
-    ev.data.fd = sd;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sd, &ev) == -1) {
+    ev.data.fd = raw_socket;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, raw_socket, &ev) == -1) {
         perror("epoll_ctl: raw_sock");
         exit(EXIT_FAILURE);
     }
-
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unix_socket, &unix_ev) == -1) {
+        perror("epoll_ctl: unix_sock");
+        exit(EXIT_FAILURE);
+    }
     return epollfd;
 }
 
@@ -117,11 +132,11 @@ void print_mac_addr(uint8_t *addr, size_t len)
     printf("%02x\n", addr[i]);
 }
 
-int send_hip_packet(struct ifs_data *ifs,
+int send_mip_packet(struct ifs_data *ifs,
                     uint8_t *src_mac_addr,
                     uint8_t *dst_mac_addr,
-                    uint8_t src_hip_addr,
-                    uint8_t dst_hip_addr,
+                    uint8_t src_mip_addr,
+                    uint8_t dst_mip_addr,
                     const char *sdu)
 {
     struct mip_pdu *pdu = alloc_pdu();
@@ -130,7 +145,7 @@ int send_hip_packet(struct ifs_data *ifs,
     if (NULL == pdu)
         return -ENOMEM;
 
-    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_hip_addr, dst_hip_addr, sdu);
+    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, sdu);
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
@@ -173,9 +188,9 @@ int handle_mip_packet(struct ifs_data *ifs, const char *app_mode)
 
     if (strcmp(app_mode, "s") == 0) {
         /* Server must greet the client back */
-        send_hip_packet(ifs, ifs->addr[0].sll_addr, pdu->ethhdr->src_mac,
-                        ifs->local_hip_addr, pdu->miphdr->src,
-                        (const char *)pdu->sdu);
+        send_mip_packet(ifs, ifs->addr[0].sll_addr, pdu->ethhdr->src_mac,
+                        ifs->local_mip_addr, pdu->miphdr->src,
+                        (const char *) pdu->sdu);
     }
 
     return 0;
