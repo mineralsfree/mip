@@ -97,24 +97,17 @@ void fill_pdu(struct mip_pdu *pdu,
               uint8_t *dst_mac_addr,
               uint8_t src_hip_addr,
               uint8_t dst_hip_addr,
-              const char *sdu)
+              uint8_t *sdu, uint8_t sdu_size)
 {
-    size_t slen = 0;
+    size_t slen = sdu_size;
 
     memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
     memcpy(pdu->ethhdr->src_mac, src_mac_addr, 6);
     pdu->ethhdr->ethertype = htons(ETH_P_HIP);
-
+    
     pdu->miphdr->dst = dst_hip_addr;
     pdu->miphdr->src = src_hip_addr;
     pdu->miphdr->ttl = 1;
-
-    if (strcmp(sdu, "hi") == 0)
-        pdu->miphdr->sdu_t = MIP_TYPE_ARP;
-    else if (strcmp(sdu, "hei") == 0)
-        pdu->miphdr->sdu_t = MIP_TYPE_PING;
-
-    slen = strlen(sdu) + 1;
 
     if (slen % 4 != 0)
         slen = slen + (4 - (slen % 4));

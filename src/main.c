@@ -26,8 +26,7 @@ int main(int argc, char *argv[]) {
     //errno - number of last error
     errno = 0;
     long mip_addr = strtol(argv[argc - 1], &err, 10);
-//    printf("%s\n", socketUpper);
-//    printf("%d\n", (int)mip_addr);
+    printf("%d\n", (int)mip_addr);
     if (hflag || errno || err == argv[argc - 1] || mip_addr > 254 || mip_addr < 0) {
         printf("Usage: %s "
                "[-d] debugging mode "

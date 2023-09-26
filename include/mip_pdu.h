@@ -24,7 +24,7 @@ void fill_pdu(struct mip_pdu *pdu,
               uint8_t *dst_mac_addr,
               uint8_t src_hip_addr,
               uint8_t dst_hip_addr,
-              const char *sdu);
+              uint8_t *sdu, uint8_t sdu_size);
 
 
 size_t mip_deserialize_pdu(struct mip_pdu *, uint8_t *);

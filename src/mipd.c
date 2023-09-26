@@ -14,6 +14,7 @@
 #include "../include/utils.h"
 #include "../include/ether.h"
 #include "../include/app_layer.h"
+#include "../include/mip_arp.h"
 //#include "utils.c"
 
 /**
@@ -21,7 +22,7 @@
  *
  * Returns the file descriptor of the server socket.
  */
-static int prepare_server_sock(char* socket_upper) {
+static int prepare_server_sock(char *socket_upper) {
     struct sockaddr_un addr;
     int sd = -1, rc = -1;
 
@@ -86,9 +87,11 @@ static int prepare_server_sock(char* socket_upper) {
 
 void mipd(char *unix_adr, uint8_t mip_addr) {
     struct ifs_data local_if;
-    int unix_sock,accept_sd,  raw_sock, efd, rc;
-    struct epoll_event  events[MAX_EVENTS];
-
+    memset(&local_if, 0, sizeof(struct ifs_data));
+    int unix_sock, accept_sd, raw_sock, efd, rc;
+    struct epoll_event events[MAX_EVENTS];
+    local_if.pendingPacket = NULL;
+    char ping_request_buf[256];
     /* Set up a raw AF_PACKET socket without ethertype filtering */
     printf("%s", "===prepare Raw Socket===\n");
     raw_sock = create_raw_socket();
@@ -114,37 +117,54 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
 //        send_mip_packet(&local_if, local_if.addr[0].sll_addr, broadcast,
 //                        local_if.local_mip_addr, 0xff, "hi");
 //    }
+    local_if.local_mip_addr = mip_addr;
 
     while (1) {
         rc = epoll_wait(efd, events, MAX_EVENTS, -1);
         if (rc == -1) {
             perror("epoll_wait");
         } else if (events->data.fd == raw_sock) {
-            printf("Recieved a packet \n");
-            rc = handle_mip_packet(&local_if, unix_adr);
+            printf("Recieved a RAW packet \n");
+            rc = handle_mip_packet_v2(&local_if);
             if (rc < 0) {
-                perror("handle_hip_packet");
+                perror("handle_mip_packet");
                 exit(EXIT_FAILURE);
             }
-        } else if(events->data.fd == unix_sock){
+        } else if (events->data.fd == unix_sock) {
             //New unix socket connection
             accept_sd = accept(unix_sock, NULL, NULL);
+            printf("PING CLIENT/SERVER CONNECTED");
+//            send_unix_buff(accept_sd, 10, "PIN");
+            local_if.usock = accept_sd;
             if (accept_sd == -1) {
                 perror("accept");
                 continue;
             }
-            rc = add_to_epoll_table(epollfd,  accept_sd);
+            rc = add_to_epoll_table(epollfd, accept_sd);
             if (rc == -1) {
                 close(unix_sock);
                 exit(EXIT_FAILURE);
             }
-            printf("Unix sock connected\n");
         } else {
+
             /* existing unix socket is trying to send data */
-            handle_unix_socket(events->data.fd);
-            uint8_t broadcast[] = ETH_DST_MAC;
-            send_mip_packet(&local_if, local_if.addr[0].sll_addr, broadcast,
-                            local_if.local_mip_addr, 0xff, "hi");
+            int sdu_size = handle_unix_socket(events->data.fd, ping_request_buf, 256);
+            printf("%s", ping_request_buf);
+            int dst_mip_address = (uint8_t) ping_request_buf[0];
+            printf("\nlocal arp table mip: %d  =  value: %d\n",dst_mip_address, local_if.arp_table.entries[dst_mip_address].mip_addr );
+            if (local_if.arp_table.entries[dst_mip_address].mip_addr == dst_mip_address) {
+                send_mip_packet_v2(&local_if, local_if.addr[0].sll_addr,
+                                   local_if.arp_table.entries[dst_mip_address].hw_addr,
+                                   local_if.local_mip_addr, dst_mip_address, (uint8_t *) ping_request_buf + 1,
+                                   MIP_TYPE_PING);
+            } else {
+                local_if.pendingPacket = (uint8_t *) ping_request_buf;
+                uint8_t broadcast[] = ETH_DST_MAC;
+                send_mip_packet_v2(&local_if, local_if.addr[0].sll_addr, broadcast,
+                                   local_if.local_mip_addr, dst_mip_address, (uint8_t *) fill_arp_sdu(dst_mip_address),
+                                    MIP_TYPE_ARP);
+            }
+
         }
     }
 }
