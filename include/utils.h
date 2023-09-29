@@ -29,11 +29,9 @@ struct ifs_data {
     uint8_t local_mip_addr;
     int ifn;
     uint8_t *pendingPacket;
-    bool isPendingPacket
 };
 int create_raw_socket(void);
 int handle_mip_packet_v2(struct ifs_data *ifs);
-int epoll_add_sock(int raw_socket, int unix_socket);
 int add_to_epoll_table(int efd, int sd);
 void get_mac_from_ifaces(struct ifs_data *);
 
@@ -46,13 +44,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t dst_mip_addr,
                        uint8_t *packet,
                        uint8_t sdu_t, int interfaceIndex);
-int send_mip_packet(struct ifs_data *ifs,
-                    uint8_t *src_mac_addr,
-                    uint8_t *dst_mac_addr,
-                    uint8_t src_mip_addr,
-                    uint8_t dst_mip_addr,
-                    uint8_t *sdu,
-                    uint8_t sdu_size);
+
 
 void init_ifs(struct ifs_data *, int rsock);
 #endif /* MY_UTILS_H */

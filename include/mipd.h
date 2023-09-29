@@ -9,14 +9,11 @@
 #include <stddef.h>
 
 
-#define SOCKET_NAME "mipd.socket"
 #define MAX_CONNS 1
 #define MIP_TYPE_ARP 0x01
 #define MIP_TYPE_PING 0x02
 #define ARP_REQ 0x00
 #define ARP_RES 0x01
-#define ETH_P_MIP 0x88B5
-#define MIP_DST_ADDR    0xff
 
 #define MIP_HDR_LEN sizeof(struct mip_hdr)
 
@@ -28,7 +25,7 @@ struct mip_hdr {
     uint8_t sdu_t: 3;
 }__attribute__((packed));
 
-void mipd(char *str, uint8_t mip_addr);
+void mipd(char *unix_path, uint8_t mip_addr);
 
 
 #endif //V2IMPL_MIP_H

@@ -9,7 +9,14 @@
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
 
 
-
+/**
+ * Entry point for the MIP ping server.
+ *
+ * argc: The number of command-line arguments.
+ * argv: An array of command-line argument strings, where the last argument is the Unix domain socket path.
+ *
+ * Returns 0 on successful completion, or an error code on failure.
+ */
 int main(int argc, char* argv[]){
     struct sockaddr_un addr;
     int	   sd, rc;

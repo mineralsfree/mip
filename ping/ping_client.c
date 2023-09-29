@@ -13,6 +13,18 @@
 #define TIMEOUT 1
 
 
+/**
+ * Entry point for the MIP ping_client program.
+ *
+ * This function handles the command-line arguments, creates a Unix domain socket,
+ * sends a MIP PING packet containing a message to a specified destination host,
+ * and prints the ping server's response along with roundtrip time.
+ *
+ * argc: The number of command-line arguments.
+ * argv: An array of command-line argument strings.
+ *
+ * Returns 0 on success, or an error code on failure.
+ */
 
 int main(int argc, char *argv[]) {
     struct timeval send_time, recv_time;

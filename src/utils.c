@@ -5,23 +5,18 @@
 #include <linux/if_packet.h>    /* AF_PACKET  */
 #include <ifaddrs.h>
 #include <string.h>
-#include <time.h>
 #include <sys/epoll.h>          /* epoll */
 #include "../include/utils.h"
 #include "../include/mipd.h"
-#include "errno.h"
 #include "../include/mip_pdu.h"
 #include "../include/mip_arp.h"
-#include "../include/ether.h"
-//#include "mip_pdu.c"
 
-void printHexDump(char *buffer, size_t length) {
-    for (size_t i = 0; i < length; i++) {
-        printf("%02X ", buffer[i]);
-    }
-    printf("\n");
-}
-
+/**
+ * Creates a RAW socket for handling MIP packets.
+ *
+ * Returns the socket descriptor on success.
+ * Exits the program with an error message on failure.
+ */
 int create_raw_socket(void) {
     int sd;
     short unsigned int protocol = ETH_P_MIP;
@@ -70,7 +65,14 @@ void get_mac_from_ifaces(struct ifs_data *ifs) {
     /* Free the interface list */
     freeifaddrs(ifaces);
 }
-
+/**
+ * Initializes interface data.
+ *
+ * This function retrieves information about the local network interfaces.
+ *
+ * ifs: Pointer to the structure that holds interface data.
+ * rsock: The raw socket descriptor to be associated with the daemon.
+ */
 void init_ifs(struct ifs_data *ifs, int rsock) {
 
     /* Get some info about the local ifaces */
@@ -80,7 +82,15 @@ void init_ifs(struct ifs_data *ifs, int rsock) {
     ifs->rsock = rsock;
 
 }
-
+/**
+ * Adds a file descriptor to the epoll event table for monitoring read events.
+ *
+ * efd: The epoll file descriptor representing the event table.
+ * sd: The file descriptor to be added to the event table.
+ *
+ * Returns the epoll file descriptor on success.
+ * Exits the program with an error message on failure.
+ */
 int add_to_epoll_table(int efd, int sd) {
     struct epoll_event ev;
 
@@ -93,30 +103,6 @@ int add_to_epoll_table(int efd, int sd) {
     return efd;
 }
 
-int epoll_add_sock(int raw_socket, int unix_socket) {
-    struct epoll_event ev, unix_ev;
-
-    /* Create epoll table */
-    int epollfd = epoll_create1(0);
-    if (epollfd == -1) {
-        perror("epoll_create1");
-        exit(EXIT_FAILURE);
-    }
-    unix_ev.events = EPOLLIN;
-    unix_ev.data.fd = unix_socket;
-    /* Add RAW socket to epoll table */
-    ev.events = EPOLLIN;
-    ev.data.fd = raw_socket;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, raw_socket, &ev) == -1) {
-        perror("epoll_ctl: raw_sock");
-        exit(EXIT_FAILURE);
-    }
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unix_socket, &unix_ev) == -1) {
-        perror("epoll_ctl: unix_sock");
-        exit(EXIT_FAILURE);
-    }
-    return epollfd;
-}
 
 /*
  * Print MAC address in hex format
@@ -130,7 +116,17 @@ void print_mac_addr(uint8_t *addr, size_t len) {
     printf("%02x", addr[i]);
 }
 
-
+/**
+ * Sends a message over a Unix socket.
+ *
+ *
+ * sd: The Unix socket descriptor for sending the message.
+ * src_mip: The source MIP address to be included in the message.
+ * str: The string message to be sent.
+ *
+ * Returns the number of bytes written on success.
+ * Exits the program with an error message on failure.
+ */
 int send_unix_buff(int sd, int src_mip, char *str) {
     int rc;
     char buf[256];
@@ -147,6 +143,12 @@ int send_unix_buff(int sd, int src_mip, char *str) {
     }
     return rc;
 }
+
+/**
+ * Prints information from a message header (struct msghdr).
+ *
+ * msg: Pointer to the message header structure to be printed.
+ */
 void printMsgInfo(struct msghdr *msg) {
     printf("Message Information:\n");
 
@@ -165,7 +167,18 @@ void printMsgInfo(struct msghdr *msg) {
     printf("  SDU Type: %u\n", mip_hdr->sdu_t);
     printf("  TTL: %u\n", mip_hdr->ttl);
 }
-
+/**
+ * Handles incoming MIP packets.
+ *
+ * This function receives and processes MIP packets from a raw socket, extracts
+ * relevant information from the packet, and takes appropriate actions based on the
+ * packet type. It manages Address Resolution Protocol (ARP) requests and responses
+ * and sends PING requests to Unix sockets.
+ *
+ * ifs: Pointer to the structure that holds interface and socket data.
+ *
+ * Returns the number of bytes received on success, or -1 on failure.
+ */
 int handle_mip_packet_v2(struct ifs_data *ifs) {
     struct sockaddr_ll so_name;
     struct eth_hdr frame_hdr;
@@ -246,6 +259,24 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
     return rc;
 }
 
+/**
+ * Sends a MIP packet over a RAW socket.
+ *
+ * This function constructs and sends a MIP packet with the provided parameters.
+ * It prepares the Ethernet and MIP headers, specifies the packet data, and sends
+ * the packet over the RAW socket.
+ *
+ * ifs: Pointer to the structure that holds interface and socket data.
+ * src_mac_addr: Pointer to the source MAC address.
+ * dst_mac_addr: Pointer to the destination MAC address.
+ * src_mip_addr: Source MIP address.
+ * dst_mip_addr: Destination MIP address.
+ * packet: Pointer to the packet data.
+ * sdu_t: Type of the MIP SDU.
+ * interfaceIndex: Index of the network interface.
+ *
+ * Returns the number of bytes sent on success, or -1 on failure.
+ */
 
 int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t *src_mac_addr,

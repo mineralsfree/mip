@@ -5,7 +5,19 @@
 #include "../include/mipd.h"
 #include <errno.h>
 
-
+/**
+ * The main function for the MIP daemon.
+ *
+ * Parses command-line arguments, initializes the MIP daemon with the provided
+ * socket upper layer and MIP address, and starts the daemon.
+ *
+ * argc: The number of command-line arguments.
+ * argv: An array of strings containing the command-line arguments.
+ *
+ * Returns:
+ * - 0 on successful execution.
+ * - An error code (non-zero) if there are issues with command-line arguments or daemon initialization.
+ */
 int main(int argc, char *argv[]) {
     int opt, dflag = 0, hflag = 0;
 
