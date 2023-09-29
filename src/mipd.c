@@ -93,11 +93,8 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
     local_if.pendingPacket = NULL;
     char ping_request_buf[256];
     /* Set up a raw AF_PACKET socket without ethertype filtering */
-    printf("%s", "===prepare Raw Socket===\n");
     raw_sock = create_raw_socket();
-    printf("%s", "===prepare Unix start===\n");
     unix_sock = prepare_server_sock(unix_adr);
-    printf("%s", "===prepare Unix end===\n");
     /* Initialize interface data */
     init_ifs(&local_if, raw_sock);
     /* Add socket to epoll table */
@@ -107,7 +104,7 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
     efd = add_to_epoll_table(efd, raw_sock);
 //    efd = epoll_add_sock(raw_sock, unix_sock);
 
-    print_mac_addr(local_if.addr[0].sll_addr, 6);
+//    print_mac_addr(local_if.addr[0].sll_addr, 6);
 //    if (strcmp(unix_adr, "c") == 0) {
 //        /* client mode */
 //        /* Send greeting to the server */
@@ -133,8 +130,6 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
         } else if (events->data.fd == unix_sock) {
             //New unix socket connection
             accept_sd = accept(unix_sock, NULL, NULL);
-            printf("PING CLIENT/SERVER CONNECTED");
-//            send_unix_buff(accept_sd, 10, "PIN");
             local_if.usock = accept_sd;
             if (accept_sd == -1) {
                 perror("accept");
@@ -149,20 +144,29 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
 
             /* existing unix socket is trying to send data */
             int sdu_size = handle_unix_socket(events->data.fd, ping_request_buf, 256);
-            printf("%s", ping_request_buf);
-            int dst_mip_address = (uint8_t) ping_request_buf[0];
+
+            //socket close
+            if (sdu_size <=0){
+                continue;
+            }
+//            printHexDump2(ping_request_buf, 5);
+//            printf("%s", ping_request_buf);
+            int dst_mip_address = (int)(unsigned char)ping_request_buf[0];
             printf("\nlocal arp table mip: %d  =  value: %d\n",dst_mip_address, local_if.arp_table.entries[dst_mip_address].mip_addr );
             if (local_if.arp_table.entries[dst_mip_address].mip_addr == dst_mip_address) {
-                send_mip_packet_v2(&local_if, local_if.addr[0].sll_addr,
-                                   local_if.arp_table.entries[dst_mip_address].hw_addr,
+                struct arp_entry entry = local_if.arp_table.entries[dst_mip_address];
+                send_mip_packet_v2(&local_if, local_if.addr[entry.interfaceIndex].sll_addr,
+                                   entry.hw_addr,
                                    local_if.local_mip_addr, dst_mip_address, (uint8_t *) ping_request_buf + 1,
-                                   MIP_TYPE_PING);
+                                   MIP_TYPE_PING, entry.interfaceIndex);
             } else {
                 local_if.pendingPacket = (uint8_t *) ping_request_buf;
                 uint8_t broadcast[] = ETH_DST_MAC;
-                send_mip_packet_v2(&local_if, local_if.addr[0].sll_addr, broadcast,
-                                   local_if.local_mip_addr, dst_mip_address, (uint8_t *) fill_arp_sdu(dst_mip_address),
-                                    MIP_TYPE_ARP);
+                for (int i = 0; i < local_if.ifn; ++i) {
+                    send_mip_packet_v2(&local_if, local_if.addr[i].sll_addr, broadcast,
+                                       local_if.local_mip_addr, dst_mip_address, (uint8_t *) fill_arp_sdu(dst_mip_address),
+                                       MIP_TYPE_ARP, i);
+                }
             }
 
         }

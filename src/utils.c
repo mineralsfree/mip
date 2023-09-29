@@ -24,7 +24,7 @@ void printHexDump(char *buffer, size_t length) {
 
 int create_raw_socket(void) {
     int sd;
-    short unsigned int protocol = 0xFFFF;
+    short unsigned int protocol = ETH_P_MIP;
 
     /* Set up a raw AF_PACKET socket without ethertype filtering */
     sd = socket(AF_PACKET, SOCK_RAW, htons(protocol));
@@ -130,36 +130,6 @@ void print_mac_addr(uint8_t *addr, size_t len) {
     printf("%02x\n", addr[i]);
 }
 
-int send_mip_packet(struct ifs_data *ifs,
-                    uint8_t *src_mac_addr,
-                    uint8_t *dst_mac_addr,
-                    uint8_t src_mip_addr,
-                    uint8_t dst_mip_addr,
-                    uint8_t *sdu, uint8_t sdu_size) {
-    struct mip_pdu *pdu = alloc_pdu();
-    uint8_t snd_buf[MAX_BUF_SIZE];
-
-    if (NULL == pdu)
-        return -ENOMEM;
-
-    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, sdu, sdu_size);
-
-    size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
-
-    /* Send the serialized buffer via RAW socket */
-    if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-               (struct sockaddr *) &(ifs->addr[0]),
-               sizeof(struct sockaddr_ll)) <= 0) {
-        perror("sendto()");
-        close(ifs->rsock);
-    }
-
-    printf("Sending PDU with content (size %zu):\n", snd_len);
-    print_pdu_content(pdu);
-
-    destroy_pdu(pdu);
-    return 0;
-}
 
 int send_unix_buff(int sd, int src_mip, char *str) {
     int rc;
@@ -215,22 +185,33 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
         perror("sendmsg");
         return -1;
     }
+    int interfaceIndex = -1;
+    for (int i = 0; i < ifs->ifn; i++) {
+        if (ifs->addr[i].sll_ifindex == so_name.sll_ifindex)
+            interfaceIndex = i;
+    }
+    if (interfaceIndex == -1 ){
+        exit(interfaceIndex);
+    }
     if (mip_hdr.sdu_t == MIP_TYPE_ARP) {
         printf("\n Packet Type = ARP\n");
         struct mip_arp_sdu *sdu = (struct mip_arp_sdu *) malloc(sizeof(struct mip_arp_sdu));
         memcpy(sdu, packet, sizeof(struct mip_arp_sdu));
 
-        printf("source mip: %d", sdu->addr);
+        printf("target mip: %d, sdu_type: %d\n", sdu->addr, sdu->type);
         if (sdu->addr == ifs->local_mip_addr && sdu->type == ARP_REQ) {
-            add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, mip_hdr.src);
+            printf("adding to arp table: \n");
+            fflush(stdout);
+            add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, mip_hdr.src, interfaceIndex);
             sdu->type = ARP_RES;
-            send_mip_packet_v2(ifs, ifs->addr[0].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr, mip_hdr.src,
-                               (uint8_t *) sdu, MIP_TYPE_ARP);
+            send_mip_packet_v2(ifs, ifs->addr[interfaceIndex].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr, mip_hdr.src,
+                               (uint8_t *) sdu, MIP_TYPE_ARP, interfaceIndex);
         } else if (sdu->type == ARP_RES) {
-            add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, sdu->addr);
+
+            add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, sdu->addr, interfaceIndex);
             if (ifs->pendingPacket != NULL & (uint8_t) ifs->pendingPacket[0] == sdu->addr) {
-                send_mip_packet_v2(ifs, ifs->addr[0].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr, mip_hdr.src,
-                                   (uint8_t *) ifs->pendingPacket + 1, MIP_TYPE_PING);
+                send_mip_packet_v2(ifs, ifs->addr[interfaceIndex].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr, mip_hdr.src,
+                                   (uint8_t *) ifs->pendingPacket + 1, MIP_TYPE_PING, interfaceIndex);
                 ifs->pendingPacket = NULL;
             }
 
@@ -238,20 +219,39 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
     } else if (mip_hdr.sdu_t == MIP_TYPE_PING) {
         send_unix_buff(ifs->usock, mip_hdr.src, (char *) packet);
     }
-    printf("<info>: We got a MIP pkt. with content '%s' from node %d with MAC addr.: ",
+    printf("\n<info>: We got a MIP pkt. with content '%s' from node %d with MAC addr.: ",
            (char *) packet, mip_hdr.src);
     print_mac_addr(frame_hdr.src_mac, 6);
-
+    printf("\n");
     return rc;
 }
+void printMsgInfo(struct msghdr *msg) {
+    printf("Message Information:\n");
+    printf("  msg_name (address): %p\n", msg->msg_name);
+    printf("  msg_namelen (address length): %zu\n", msg->msg_namelen);
+    printf("  msg_iovlen (number of IO vectors): %zd\n", msg->msg_iovlen);
 
+    printf("  Source MAC Address: ");
+    print_mac_addr(((struct eth_hdr *)msg->msg_iov[0].iov_base)->src_mac, 6);
+
+    printf("  Target MAC Address: ");
+    print_mac_addr(((struct eth_hdr *)msg->msg_iov[0].iov_base)->dst_mac, 6);
+
+    printf("  Ethertype: 0x%04X\n", ((struct eth_hdr *)msg->msg_iov[0].iov_base)->ethertype);
+
+    struct mip_hdr *mip_hdr = (struct mip_hdr *)msg->msg_iov[1].iov_base;
+    printf("  Source MIP Address: %u\n", mip_hdr->src);
+    printf("  Destination MIP Address: %u\n", mip_hdr->dst);
+    printf("  SDU Length: %u\n", mip_hdr->sdu_l);
+    printf("  SDU Type: %u\n", mip_hdr->sdu_t);
+}
 
 int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t *src_mac_addr,
                        uint8_t *dst_mac_addr,
                        uint8_t src_mip_addr,
                        uint8_t dst_mip_addr,
-                       uint8_t *packet, uint8_t sdu_t) {
+                       uint8_t *packet, uint8_t sdu_t, int interfaceIndex) {
     struct eth_hdr frame_hdr;
     struct mip_hdr mip_hdr;
     struct msghdr *msg;
@@ -262,7 +262,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
     memcpy(frame_hdr.dst_mac, dst_mac_addr, 6);
     memcpy(frame_hdr.src_mac, src_mac_addr, 6);
     /* Match the ethertype in packet_socket.c: */
-    frame_hdr.ethertype = 0xFFFF;
+    frame_hdr.ethertype = ETH_P_MIP;
 
     /* Fill in MIP header */
     mip_hdr.dst = dst_mip_addr;
@@ -290,15 +290,12 @@ int send_mip_packet_v2(struct ifs_data *ifs,
         perror("wrong_mip_sdu_t");
         return -1;
     }
-    printf("%s", "=====================BUFFER START=========================\n");
-    printHexDump((char *) packet, msgvec[2].iov_len);
-    printf("%s", "=====================BUFFER END=========================\n");
 
     /* Allocate a zeroed-out message info struct */
     msg = (struct msghdr *) calloc(1, sizeof(struct msghdr));
 
     /* Fill out message metadata struct */
-    msg->msg_name = &(ifs->addr[0]);
+    msg->msg_name = &(ifs->addr[interfaceIndex]);
     msg->msg_namelen = sizeof(struct sockaddr_ll);
     msg->msg_iovlen = 3;
     msg->msg_iov = msgvec;
@@ -306,7 +303,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
     printf("Sending a MIP pkt. with content '%s' to node %u with MAC addr.: \n",
            (char *) packet, mip_hdr.dst);
     print_mac_addr(frame_hdr.dst_mac, 6);
-
+    printMsgInfo(msg);
     /* Send message via RAW socket */
     rc = sendmsg(ifs->rsock, msg, 0);
     if (rc == -1) {
@@ -322,34 +319,3 @@ int send_mip_packet_v2(struct ifs_data *ifs,
 }
 
 
-int handle_mip_packet(struct ifs_data *ifs, const char *app_mode) {
-    struct mip_pdu *pdu = (struct mip_pdu *) malloc(sizeof(struct mip_pdu));
-    if (NULL == pdu) {
-        perror("malloc");
-        return -ENOMEM;
-    }
-
-    uint8_t rcv_buf[MAX_BUF_SIZE];
-
-    /* Recv the serialized buffer via RAW socket */
-    if (recvfrom(ifs->rsock, rcv_buf, MAX_BUF_SIZE, 0, NULL, NULL) <= 0) {
-        perror("recvfrom()");
-        close(ifs->rsock);
-    }
-    size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
-    // MIP ARP
-    if (pdu->miphdr->sdu_t == 0x01) {
-        handle_arp_packet(ifs, pdu);
-    }
-    printf("Receiving PDU with content (size %zu) :\n", rcv_len);
-    print_pdu_content(pdu);
-
-    if (strcmp(app_mode, "s") == 0) {
-        /* Server must greet the client back */
-        send_mip_packet(ifs, ifs->addr[0].sll_addr, pdu->ethhdr->src_mac,
-                        ifs->local_mip_addr, pdu->miphdr->src,
-                        (uint8_t *) pdu->sdu, 32);
-    }
-
-    return 0;
-}

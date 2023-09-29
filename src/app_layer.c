@@ -19,7 +19,7 @@ int handle_unix_socket(int fd, char* buf, int length)
     rc = read(fd, buf, length);
     if (rc <= 0) {
         close(fd);
-        printf("<%d> left the chat...\n", fd);
+        printf("<%d>: PING CLIENT/SERVER DISCONNECTED\n", fd);
         return -1;
     }
 

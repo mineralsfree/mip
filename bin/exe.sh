@@ -1,1 +1,1 @@
- sudo mn --mac --custom topo_p2p.py --topo mytopo
+sudo -E mn --custom he1-mn-topo.py --topo he1 --link tc --x
