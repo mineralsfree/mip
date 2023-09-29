@@ -17,22 +17,7 @@ struct mip_pdu {
     uint8_t *sdu;
 } __attribute__((packed));
 
-struct mip_pdu *alloc_pdu(void);
-
-void fill_pdu(struct mip_pdu *pdu,
-              uint8_t *src_mac_addr,
-              uint8_t *dst_mac_addr,
-              uint8_t src_hip_addr,
-              uint8_t dst_hip_addr,
-              uint8_t *sdu, uint8_t sdu_size);
 
 
-size_t mip_deserialize_pdu(struct mip_pdu *, uint8_t *);
-
-void print_pdu_content(struct mip_pdu *pdu);
-
-size_t mip_serialize_pdu(struct mip_pdu *pdu, uint8_t *snd_buf);
-
-void destroy_pdu(struct mip_pdu *);
 
 #endif //V2IMPL_MIP_PDU_H

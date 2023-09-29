@@ -13,6 +13,7 @@
 
 struct arp_entry{
     uint8_t hw_addr[6];
+    int interfaceIndex;
     uint8_t mip_addr;
 };
 
@@ -37,7 +38,6 @@ int add_to_epoll_table(int efd, int sd);
 void get_mac_from_ifaces(struct ifs_data *);
 
 void print_mac_addr(uint8_t *addr, size_t len);
-int handle_mip_packet(struct ifs_data *ifs, const char *app_mode);
 int send_unix_buff(int sd, int src_mip, char *str);
 int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t *src_mac_addr,
@@ -45,7 +45,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t src_mip_addr,
                        uint8_t dst_mip_addr,
                        uint8_t *packet,
-                       uint8_t sdu_t);
+                       uint8_t sdu_t, int interfaceIndex);
 int send_mip_packet(struct ifs_data *ifs,
                     uint8_t *src_mac_addr,
                     uint8_t *dst_mac_addr,

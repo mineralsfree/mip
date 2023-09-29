@@ -31,27 +31,27 @@ int main(int argc, char* argv[]){
         close(sd);
         exit(EXIT_FAILURE);
     }
-    printf("sent");
     // Receive and print the server's response
-    rc = read(sd, buf, sizeof(buf) - 1);
-    if (rc < 0) {
-        perror("read");
-        close(sd);
-        exit(EXIT_FAILURE);
-    } else if (rc == 0) {
-        printf("mipd closed the connection.\n");
-        close(sd);
-        exit(0);
-
-    } else {
-        int dst_mip_address = (uint8_t) buf[0];
-        buf[rc] = '\0';  // Null-terminate the received data
-        printf("Received: %s from %d\n, message length: %d", buf+1, dst_mip_address, rc);
-        buf[2] = 'O';
-        write(sd, buf, 256);
+    while(1){
+        rc = read(sd, buf, sizeof(buf) - 1);
+        if (rc < 0) {
+            perror("read");
+            close(sd);
+            exit(EXIT_FAILURE);
+        } else if (rc == 0) {
+            printf("mipd closed the connection.\n");
+            close(sd);
+            break;
+        } else {
+            int dst_mip_address = (uint8_t) buf[0];
+            buf[rc] = '\0';  // Null-terminate the received data
+            printf("Received: %s from %d\n, message length: %d", buf+1, dst_mip_address, rc);
+            buf[2] = 'O';
+            write(sd, buf, 256);
+        }
     }
 
 
+
     close(sd);
-    fgets(buf, sizeof(buf), stdin);
 }

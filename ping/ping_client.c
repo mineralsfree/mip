@@ -10,6 +10,9 @@
 #include <sys/un.h>        /* definitions for UNIX domain sockets */
 #include <errno.h>
 
+#define TIMEOUT 1
+
+
 
 int main(int argc, char *argv[]) {
     struct timeval send_time, recv_time;
@@ -24,21 +27,22 @@ int main(int argc, char *argv[]) {
             hflag = 1;
         }
     }
+
     //errno - number of last error
     errno = 0;
-    uint8_t mip_addr = (uint8_t) strtol(argv[argc - 2], &err, 10);
-    printf("%d\n", (uint8_t) mip_addr);
+    long mip_addr = strtol(argv[argc - 2], &err, 10);
     if (hflag || errno || err == argv[argc - 2] || mip_addr > 254 || mip_addr < 0 || argc < 3) {
         printf("Usage: %s "
                "[-h] prints help and exits the program <socket_lower> <destination_host> <message> ", argv[0]);
         return errno || 0;
     }
-
+    char ping[] = "PING: ";
     memset(buf, 0, sizeof(buf));
-    memset(buf, (uint8_t) mip_addr, 1);
-    strcpy(buf + 1, strcat("PING: ", argv[argc - 1]));
+
+    strcat(ping, argv[argc - 1]);
+    strcpy(buf + 1, ping);
+    buf[0] = (char) mip_addr;
     char *socketLower = argv[argc - 3];
-    printf("Socket: %s", socketLower);
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
         perror("socket");
@@ -48,7 +52,10 @@ int main(int argc, char *argv[]) {
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, socketLower, sizeof(addr.sun_path) - 1);
-
+    struct timeval tv;
+    tv.tv_sec = TIMEOUT;
+    tv.tv_usec = 0;
+    setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
     rc = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
     if (rc < 0) {
         perror("connect");
@@ -68,7 +75,11 @@ int main(int argc, char *argv[]) {
     // Receive and print the server's response
     rc = read(sd, buf, sizeof(buf) - 1);
     if (rc < 0) {
-        perror("read");
+        if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            perror("TIMEOUT");
+        } else {
+            perror("read");
+        }
         close(sd);
         exit(EXIT_FAILURE);
     } else if (rc == 0) {
@@ -83,5 +94,4 @@ int main(int argc, char *argv[]) {
     }
 
     close(sd);
-    fgets(buf, sizeof(buf), stdin);
 }

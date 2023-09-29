@@ -129,6 +129,7 @@ void mipd(char *unix_adr, uint8_t mip_addr) {
             }
         } else if (events->data.fd == unix_sock) {
             //New unix socket connection
+            printf("UNIX socket connected\n");
             accept_sd = accept(unix_sock, NULL, NULL);
             local_if.usock = accept_sd;
             if (accept_sd == -1) {

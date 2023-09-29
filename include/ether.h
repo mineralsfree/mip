@@ -8,7 +8,7 @@
 #include <stdint.h>
 #define ETH_MAC_LEN 6
 #define ETH_DST_MAC {0xff, 0xff, 0xff, 0xff, 0xff, 0xff} // broadcast MAC addr.
-#define ETH_P_HIP 0xFFFF
+#define ETH_P_MIP 0xFFFF
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
 struct eth_hdr {
