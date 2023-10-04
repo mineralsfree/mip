@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     errno = 0;
     long mip_addr = strtol(argv[argc - 1], &err, 10);
     printf("%d\n", (int)mip_addr);
+    //Show how to use, when the parameters does not fit requirements
     if (hflag || errno || err == argv[argc - 1] || mip_addr > 254 || mip_addr < 0) {
         printf("Usage: %s "
                "[-d] debugging mode "
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
         return errno || 0;
     }
     if (!dflag) {
+        // Redirect output to /dev/null, when debug mode is not enabled
         freopen("/dev/null", "w", stdout);
     }
     printf("Starting the MIP daemon\n");
