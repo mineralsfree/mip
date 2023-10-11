@@ -1,6 +1,3 @@
-//
-// Created by mikita on 25/09/23.
-//
 #include  <stdint.h>
 
 #ifndef V2IMPL_MIP_ARP_H

@@ -1,8 +1,4 @@
-#include <stdbool.h>
 #include "../include/mipd.h"
-//
-// Created by mikita on 16/09/23.
-//
 #include <stdio.h>        /* standard input/output library functions */
 #include <stdlib.h>        /* standard library definitions (macros) */
 #include <unistd.h>        /* standard symbolic constants and types */

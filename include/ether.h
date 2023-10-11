@@ -1,7 +1,3 @@
-//
-// Created by mikita on 24/09/23.
-//
-
 #ifndef V2IMPL_ETHER_H
 #define V2IMPL_ETHER_H
 

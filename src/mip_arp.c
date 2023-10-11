@@ -1,6 +1,3 @@
-//
-// Created by mikita on 25/09/23.
-//
 #include <malloc.h>
 #include <string.h>
 #include "../include/mip_arp.h"
