@@ -13,6 +13,27 @@
 #define TIMEOUT 1
 
 
+
+int is_program_already_running(char* lock_file) {
+    if (access(lock_file, F_OK) != -1) {
+        return 1;  // Lock file exists; program is already running
+    }
+    return 0;  // Lock file doesn't exist; program is not running
+}
+
+void create_lock(char* lock_file) {
+    FILE* file = fopen(lock_file, "w");
+    if (file) {
+        fprintf(file, "%d", getpid());
+        fclose(file);
+    }
+}
+
+void release_lock(char* lock_file) {
+    remove(lock_file);
+}
+
+
 /**
  * Entry point for the MIP ping_client program.
  *
@@ -25,14 +46,12 @@
  *
  * Returns 0 on success, or an error code on failure.
  */
-
 int main(int argc, char *argv[]) {
-    int min_microseconds = 100000;
-    int max_microseconds = 1000000;
-    int random_microseconds = (rand() % (max_microseconds - min_microseconds + 1)) + min_microseconds;
-    usleep(random_microseconds);
-    struct timeval send_time, recv_time;
-    gettimeofday(&send_time, NULL);
+//    int min_microseconds = 100000;
+//    int max_microseconds = 1000000;
+//    int random_microseconds = (rand() % (max_microseconds - min_microseconds + 1)) + min_microseconds;
+//    usleep(random_microseconds);
+
 
     int opt, hflag = 0;
     struct sockaddr_un addr;
@@ -60,9 +79,23 @@ int main(int argc, char *argv[]) {
     strcpy(buf + 1, ping);
     buf[0] = (char) mip_addr;
     char *socketLower = argv[argc - 3];
+    char lock_file[50];
+    strcpy(lock_file, socketLower);
+    strcat(lock_file, ".lock");
+    if (is_program_already_running(lock_file)){
+        printf("Another instance of the program is already running. Waiting for it to finish...\n");
+        // Periodically check for the lock file until it's released
+        while (is_program_already_running(lock_file)) {
+            usleep(100000);  // Sleep for 100ms
+        }
+    }
+    create_lock(lock_file);
+    struct timeval send_time, recv_time;
+    gettimeofday(&send_time, NULL);
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
         perror("socket");
+        release_lock(lock_file);
         exit(EXIT_FAILURE);
     }
 
@@ -79,6 +112,7 @@ int main(int argc, char *argv[]) {
     if (rc < 0) {
         perror("connect");
         close(sd);
+        release_lock(lock_file);
         exit(EXIT_FAILURE);
     }
 
@@ -88,6 +122,7 @@ int main(int argc, char *argv[]) {
     if (rc < 0) {
         perror("write");
         close(sd);
+        release_lock(lock_file);
         exit(EXIT_FAILURE);
     }
 
@@ -95,13 +130,16 @@ int main(int argc, char *argv[]) {
     rc = read(sd, buf, sizeof(buf) - 1);
     if (rc < 0) {
         if (errno == EWOULDBLOCK || errno == EAGAIN) {
+            release_lock(lock_file);
             perror("TIMEOUT");
         } else {
+            release_lock(lock_file);
             perror("read");
         }
         close(sd);
         exit(EXIT_FAILURE);
     } else if (rc == 0) {
+        release_lock(lock_file);
         printf("Server closed the connection.\n");
     } else {
         buf[rc] = '\0';  // Null-terminate the received data
@@ -111,6 +149,6 @@ int main(int argc, char *argv[]) {
         printf("Received: %s from node with MIP %d\n", buf + 1, (uint8_t) buf[0]);
         printf("Roundtrip time: %lld microseconds\n", roundtrip_time_us);
     }
-
+    release_lock(lock_file);
     close(sd);
 }

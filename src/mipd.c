@@ -28,6 +28,9 @@
 void mipd(char *unix_path, uint8_t mip_addr) {
     struct ifs_data local_if;
     memset(&local_if, 0, sizeof(struct ifs_data));
+    for (int i = 0; i < 255; ++i) {
+        local_if.pendingPackets[i] = NULL;
+    }
     int unix_sock, accept_sd, raw_sock, efd, rc;
     struct epoll_event events[MAX_EVENTS];
     local_if.pendingPacket = NULL;
@@ -87,7 +90,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                                    local_if.local_mip_addr, dst_mip_address, (uint8_t *) ping_request_buf + 1,
                                    MIP_TYPE_PING, entry.interfaceIndex);
             } else {
-                local_if.pendingPacket = (uint8_t *) ping_request_buf;
+                local_if.pendingPackets[dst_mip_address] = (uint8_t *) ping_request_buf;
                 uint8_t broadcast[] = ETH_DST_MAC;
                 for (int i = 0; i < local_if.ifn; ++i) {
                     uint8_t *packet = (uint8_t *) fill_arp_sdu(dst_mip_address);

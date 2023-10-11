@@ -28,6 +28,7 @@ struct ifs_data {
     int usock;
     uint8_t local_mip_addr;
     int ifn;
+    uint8_t *pendingPackets[255];
     uint8_t *pendingPacket;
 };
 int create_raw_socket(void);

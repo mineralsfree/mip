@@ -164,7 +164,7 @@ void printMsgInfo(struct msghdr *msg) {
     printf("  Source MIP Address: %u\n", mip_hdr->src);
     printf("  Destination MIP Address: %u\n", mip_hdr->dst);
     printf("  SDU Length: %u\n", mip_hdr->sdu_l);
-    printf("  SDU Type: %u\n", mip_hdr->sdu_t);
+    printf("  SDU Type: %u (%s)\n", mip_hdr->sdu_t, (mip_hdr->sdu_t == 1) ? "MIP-ARP" : "PING");
     printf("  TTL: %u\n", mip_hdr->ttl);
 }
 /**
@@ -180,7 +180,7 @@ void printMsgInfo(struct msghdr *msg) {
  * Returns the number of bytes received on success, or -1 on failure.
  */
 int handle_mip_packet_v2(struct ifs_data *ifs) {
-    struct sockaddr_ll so_name;
+    struct sockaddr_ll so_name = {0};
     struct eth_hdr frame_hdr;
     struct mip_hdr mip_hdr;
     struct msghdr msg = {0};
@@ -193,13 +193,12 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
     msgvec[0].iov_base = &frame_hdr;
     msgvec[0].iov_len = sizeof(struct eth_hdr);
 
-    /* Point to hello header */
+    /* Point to mip header */
     msgvec[1].iov_base = &mip_hdr;
     msgvec[1].iov_len = sizeof(struct mip_hdr);
 
     /* Point to ping/pong packet */
     msgvec[2].iov_base = (void *) packet;
-    /* We can read up to 256 characters. Who cares? PONG is only 5 bytes */
     msgvec[2].iov_len = 256;
 
     /* Fill out message metadata struct */
@@ -225,11 +224,11 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
         exit(interfaceIndex);
     }
     if (mip_hdr.sdu_t == MIP_TYPE_ARP) {
-        printf("\n Packet Type = ARP\n");
+//        printf("\n Packet Type = ARP\n");
         struct mip_arp_sdu *sdu = (struct mip_arp_sdu *) malloc(sizeof(struct mip_arp_sdu));
         memcpy(sdu, packet, sizeof(struct mip_arp_sdu));
 
-        printf("target mip: %d, sdu_type: %d\n", sdu->addr, sdu->type);
+//        printf("target mip: %d, sdu_type: %d\n", sdu->addr, sdu->type);
         if (sdu->addr == ifs->local_mip_addr && sdu->type == ARP_REQ) {
             printf("adding to arp table: \n");
             fflush(stdout);
@@ -239,13 +238,12 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
                                mip_hdr.src,
                                (uint8_t *) sdu, MIP_TYPE_ARP, interfaceIndex);
         } else if (sdu->type == ARP_RES) {
-
             add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, sdu->addr, interfaceIndex);
-            if (ifs->pendingPacket != NULL & (uint8_t) ifs->pendingPacket[0] == sdu->addr) {
+            if (ifs->pendingPackets[mip_hdr.src] != NULL && (uint8_t) ifs->pendingPackets[mip_hdr.src][0] == sdu->addr) {
                 send_mip_packet_v2(ifs, ifs->addr[interfaceIndex].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr,
                                    mip_hdr.src,
-                                   (uint8_t *) ifs->pendingPacket + 1, MIP_TYPE_PING, interfaceIndex);
-                ifs->pendingPacket = NULL;
+                                   (uint8_t *) ifs->pendingPackets[mip_hdr.src] + 1, MIP_TYPE_PING, interfaceIndex);
+                ifs->pendingPackets[mip_hdr.src] = NULL;
             }
 
         }
