@@ -33,6 +33,8 @@ int main(int argc, char* argv[]){
     strncpy(addr.sun_path, socketUpper, sizeof(addr.sun_path) - 1);
 
     rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
+    printf("Connected to unix socket %s", socketUpper);
+    fflush(stdout);
     if ( rc < 0) {
         perror("connect");
         close(sd);
@@ -54,7 +56,9 @@ int main(int argc, char* argv[]){
             buf[rc] = '\0';  // Null-terminate the received data
             printf("Received: %s from %d\n, message length: %d", buf+1, dst_mip_address, rc);
             buf[2] = 'O';
+            printf("Sending: %s to %d\n, message length: %d", buf+1, dst_mip_address, rc);
             write(sd, buf, 256);
+
         }
     }
 

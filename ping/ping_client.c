@@ -27,8 +27,13 @@
  */
 
 int main(int argc, char *argv[]) {
+    int min_microseconds = 100000;
+    int max_microseconds = 1000000;
+    int random_microseconds = (rand() % (max_microseconds - min_microseconds + 1)) + min_microseconds;
+    usleep(random_microseconds);
     struct timeval send_time, recv_time;
     gettimeofday(&send_time, NULL);
+
     int opt, hflag = 0;
     struct sockaddr_un addr;
     int sd, rc;
@@ -69,6 +74,8 @@ int main(int argc, char *argv[]) {
     tv.tv_usec = 0;
     setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
     rc = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
+    printf("Client: sending %s, to node with MIP address %ld\n", argv[argc-1], mip_addr);
+    fflush(stdout);
     if (rc < 0) {
         perror("connect");
         close(sd);
@@ -83,7 +90,7 @@ int main(int argc, char *argv[]) {
         close(sd);
         exit(EXIT_FAILURE);
     }
-    printf("sent");
+
     // Receive and print the server's response
     rc = read(sd, buf, sizeof(buf) - 1);
     if (rc < 0) {
