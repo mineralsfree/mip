@@ -44,12 +44,11 @@ void print_arp_content(struct arp_table *table) {
  * interfaceIndex: The interface index associated with the MIP address.
  */
 void add_arp_entry(struct arp_table *table, uint8_t *hw_addr, uint8_t mip_addr, int interfaceIndex) {
-    printf("Adding entry for mip: %d, interface index %d", mip_addr, interfaceIndex);
+    printf("Adding entry for mip: %d, interface index %d\n", mip_addr, interfaceIndex);
     struct arp_entry *entry = &table->entries[mip_addr];
     memcpy(entry->hw_addr, hw_addr, ETH_MAC_LEN);
     entry->mip_addr = mip_addr;
     entry->interfaceIndex = interfaceIndex;
-    print_arp_content(table);
 }
 /**
  * Creates and fills an ARP (Address Resolution Protocol) Service Data Unit (SDU).

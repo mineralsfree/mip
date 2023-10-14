@@ -31,7 +31,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
     struct epoll_event events[MAX_EVENTS];
     local_if.pendingPacket = NULL;
     char ping_request_buf[256];
-    /* Set up a raw AF_PACKET socket without ethertype filtering */
+
     raw_sock = create_raw_socket();
     unix_sock = prepare_unix_sock(unix_path);
     /* Initialize interface data */
@@ -70,7 +70,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
             }
         } else {
 
-            /* existing unix socket is trying to send data */
+            /* existing unix socket is sending data */
             int sdu_size = handle_unix_socket(events->data.fd, ping_request_buf, 256);
 
             //socket close
@@ -79,6 +79,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
             }
             int dst_mip_address = (int)(unsigned char)ping_request_buf[0];
             printf("\nlocal arp table mip: %d  =  value: %d\n",dst_mip_address, local_if.arp_table.entries[dst_mip_address].mip_addr );
+            /* mip address is in the arp table - we send PING packet*/
             if (local_if.arp_table.entries[dst_mip_address].mip_addr == dst_mip_address) {
                 struct arp_entry entry = local_if.arp_table.entries[dst_mip_address];
                 send_mip_packet_v2(&local_if, local_if.addr[entry.interfaceIndex].sll_addr,
@@ -86,6 +87,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                                    local_if.local_mip_addr, dst_mip_address, (uint8_t *) ping_request_buf + 1,
                                    MIP_TYPE_PING, entry.interfaceIndex);
             } else {
+                /* mip address is not in the arp table - we save the PING request and send ARP request packet*/
                 local_if.pendingPackets[dst_mip_address] = (uint8_t *) ping_request_buf;
                 uint8_t broadcast[] = ETH_DST_MAC;
                 for (int i = 0; i < local_if.ifn; ++i) {

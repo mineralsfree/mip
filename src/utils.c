@@ -10,6 +10,7 @@
 #include "../include/mipd.h"
 #include "../include/mip_pdu.h"
 #include "../include/mip_arp.h"
+#include <math.h>
 
 /**
  * Creates a RAW socket for handling MIP packets.
@@ -40,8 +41,6 @@ void get_mac_from_ifaces(struct ifs_data *ifs) {
     int i = 0;
 
     /* Enumerate interfaces: */
-    /* Note in man getifaddrs that this function dynamically allocates
-       memory. It becomes our responsability to free it! */
     if (getifaddrs(&ifaces)) {
         perror("getifaddrs");
         exit(-1);
@@ -133,7 +132,7 @@ int send_unix_buff(int sd, int src_mip, char *str) {
     memset(buf, 0, sizeof(buf));
     memset(buf, src_mip, 1);
     strcpy(buf + 1, str);
-    printf("sending %s, to unix socket %d, message Length: %lu", str, sd, strlen(str) + 1);
+    printf("sending %s, to unix socket %d, message Length: %lu\n", str, sd, strlen(str) + 1);
     fflush(stdout);
     rc = write(sd, buf, strlen(str) + 1);
     if (rc < 0) {
@@ -224,11 +223,9 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
         exit(interfaceIndex);
     }
     if (mip_hdr.sdu_t == MIP_TYPE_ARP) {
-//        printf("\n Packet Type = ARP\n");
         struct mip_arp_sdu *sdu = (struct mip_arp_sdu *) malloc(sizeof(struct mip_arp_sdu));
         memcpy(sdu, packet, sizeof(struct mip_arp_sdu));
 
-//        printf("target mip: %d, sdu_type: %d\n", sdu->addr, sdu->type);
         if (sdu->addr == ifs->local_mip_addr && sdu->type == ARP_REQ) {
             printf("adding to arp table: \n");
             fflush(stdout);
@@ -253,7 +250,6 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
     printf("\n Recieving MIP packet \n");
     printMsgInfo(&msg);
     print_arp_content(&ifs->arp_table);
-    printf("\n");
     return rc;
 }
 
@@ -319,7 +315,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
         perror("wrong_mip_sdu_t");
         return -1;
     }
-    mip_hdr.sdu_l = length;
+    mip_hdr.sdu_l = ceil(length/4);
     msgvec[2].iov_len = length;
 
     /* Allocate a zeroed-out message info struct */

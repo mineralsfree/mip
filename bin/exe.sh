@@ -1,1 +1,0 @@
-sudo -E mn --custom he1-mn-topo.py --topo he1 --link tc --x

@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
     //errno - number of last error
     errno = 0;
     long mip_addr = strtol(argv[argc - 1], &err, 10);
-    printf("%d\n", (int)mip_addr);
-    //Show how to use, when the parameters does not fit requirements
+    //Show help, when the parameters do not fit requirements
     if (hflag || errno || err == argv[argc - 1] || mip_addr > 254 || mip_addr < 0) {
         printf("Usage: %s "
                "[-d] debugging mode "

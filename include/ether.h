@@ -4,6 +4,7 @@
 #include <stdint.h>
 #define ETH_MAC_LEN 6
 #define ETH_DST_MAC {0xff, 0xff, 0xff, 0xff, 0xff, 0xff} // broadcast MAC addr.
+// For some unclear reason, changing this value from (RAW ETHERNET FRAME) 0xFFFF to (MIP) 0x88B5 causes loss of packages.
 #define ETH_P_MIP 0xFFFF
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
