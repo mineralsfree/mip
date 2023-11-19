@@ -128,7 +128,7 @@ def init_he2(self, line):
 
     # Make sure that the MIP and Routing daemons are ready and the topology
     # is converged
-    time.sleep(5)
+    time.sleep(2)
 
     terms.append(openTerm(self,
                           node=E,
@@ -136,7 +136,7 @@ def init_he2(self, line):
                           geometry="38x20+807+583",
                           cmd="./ping_server usockE"))
 
-    time.sleep(3)
+    time.sleep(1)
 
     terms.append(openTerm(self,
                           node=A,

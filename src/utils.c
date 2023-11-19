@@ -167,9 +167,9 @@ int send_routing_request(int sd, uint8_t dst_mip, uint8_t src_mip) {
     char req[] = "REQ";
     char buf[254];
     memset(buf, 0, sizeof(buf));
-    strcpy(buf + 1, req);
+    strcpy(buf + 2, req);
     buf[0] = (char) src_mip;
-    buf[4] = (char) dst_mip;
+    buf[5] = (char) dst_mip;
 //    printf("SENDING from %d to %d content %s\n", src_mip,dst_mip, buf);
     rc = write(sd, buf, sizeof(buf));
     return rc;

@@ -133,8 +133,8 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                     continue;
                 }
                 char *temp_str = (char *) routing_local_buf;
-                if (temp_str[1] == 'R' && temp_str[2] == 'S' && temp_str[3] == 'P') {
-                    int next_hop = (int) (unsigned char) routing_local_buf[4];
+                if (temp_str[2] == 'R' && temp_str[3] == 'S' && temp_str[4] == 'P') {
+                    int next_hop = (int) (unsigned char) routing_local_buf[5];
                     int dst_host = (int) (unsigned char) routing_local_buf[0];
                     if (local_if.pending_packets[dst_host].packet[0] != 0) {
                         struct arp_entry entry = local_if.arp_table.entries[next_hop];

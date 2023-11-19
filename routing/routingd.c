@@ -70,19 +70,19 @@ int main(int argc, char *argv[]) {
         } else {
             uint8_t source_addr = (uint8_t) buff[0];
             printf("RECIEVED: %s of length %lu from %d\n", buff, strlen(buff), source_addr);
-            if (buff[1] == 'R' && buff[2] == 'E' && buff[3] == 'Q') {
-                uint8_t dst_addr = (uint8_t) buff[4];
+            if (buff[2] == 'R' && buff[3] == 'E' && buff[4] == 'Q') {
+                uint8_t dst_addr = (uint8_t) buff[5];
                 printf("RECIEVED: REQUEST to NODE %d\n",dst_addr);
                 struct routing_table_entry *entry = getRoutingTableEntry(&rt, dst_addr);
                 char buffer[254];
                 memset(buf, 0, sizeof(buf));
                 char upd[] = "RSP";
-                strcpy(buffer +  1, upd);
+                strcpy(buffer +  2, upd);
                 buffer[0] = (char) dst_addr;
                 if (entry != NULL) {
-                    buffer[4] = (char) entry->next_hop;
+                    buffer[5] = (char) entry->next_hop;
                 } else {
-                    buffer[4] = (char) 255;
+                    buffer[5] = (char) 255;
                 }
                 write(sd, buffer, sizeof(buffer));
 

@@ -23,17 +23,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/he2-mn-script.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/he2-mn-script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/mipd" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mipd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ping_client" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ping_client" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ping_server" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ping_server" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/routingd" beforeDir="false" afterPath="$PROJECT_DIR$/bin/routingd" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/mipd.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/mipd.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/routingd.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/routingd.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/utils.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/utils.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/mip_arp.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mip_arp.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/mipd.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mipd.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/utils.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/utils.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ping/ping_client.c" beforeDir="false" afterPath="$PROJECT_DIR$/ping/ping_client.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ping/ping_server.c" beforeDir="false" afterPath="$PROJECT_DIR$/ping/ping_server.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routing/routingd.c" beforeDir="false" afterPath="$PROJECT_DIR$/routing/routingd.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mipd.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/mipd.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.c" afterDir="false" />
@@ -100,28 +93,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/mikita/UIO/NET/homeex/150020/bin&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;settings.editor.splitter.proportion&quot;: &quot;0.35080644&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/mikita/UIO/NET/homeex/150020/bin",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "aDefault",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.splitter.proportion": "0.35080644",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/bin" />
@@ -245,7 +238,7 @@
       <workItem from="1700321909848" duration="9022000" />
       <workItem from="1700331021865" duration="26441000" />
       <workItem from="1700362165679" duration="769000" />
-      <workItem from="1700395523327" duration="11448000" />
+      <workItem from="1700395523327" duration="12097000" />
     </task>
     <servers />
   </component>
