@@ -318,7 +318,7 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
     }
     printf("\n Recieving MIP packet \n");
     printMsgInfo(&msg);
-    print_arp_content(&ifs->arp_table);
+//    print_arp_content(&ifs->arp_table);
     return rc;
 }
 
@@ -400,7 +400,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
 
     printf("Sending a MIP packet  \n");
     printMsgInfo(msg);
-    print_arp_content(&ifs->arp_table);
+//    print_arp_content(&ifs->arp_table);
     /* Send message via RAW socket */
     rc = sendmsg(ifs->rsock, msg, 0);
     if (rc == -1) {

@@ -1,7 +1,7 @@
 #ifndef ROUT_LAYER
 #define ROUT_LAYER
 
-#define MAX_ENTRIES 256
+#define MAX_ENTRIES 10
 
 struct routing_table_entry{
     uint8_t destination;

@@ -43,11 +43,14 @@ void send_table(struct routing_table *table, uint8_t addr) {
     char buf[245];
     char *resp;
     resp = serialize_routing_table(table);
+    printf("INITIAL STRING: %s\n", resp);
+
     memset(buf, 0, sizeof(buf));
-    char upd[] = "UPD";
-    strcat(upd, resp);
-    strcpy(buf + 1, upd);
+    snprintf(buf, sizeof(buf), "0UPD%s", resp);
     buf[0] = (char) addr;
+
+    printf("\nSENDING SERIALIZED STRING: %s of LENGTH: %lu TO NODE: %d\n", buf, strlen(buf), addr);
+
     write(table->sd, buf, strlen(buf));
 
 }
@@ -78,18 +81,29 @@ void add_routing_tableEntry(struct routing_table *table, uint8_t destination, ui
 
 void handle_incoming_routing_entry(struct routing_table *table, struct routing_table_entry *entry,
                                    uint8_t source_table_mip) {
-    struct routing_table_entry *existant_entry;
-
     if (entry->destination == table->my_mip) {
         return;
     } else {
-        existant_entry = getRoutingTableEntry(table, entry->destination);
-        if (existant_entry && existant_entry->cost > entry->cost + 1) {
-            existant_entry->cost = entry->cost + 1;
+        struct routing_table_entry *existant_entry= getRoutingTableEntry(table, entry->destination);
+        if (existant_entry == NULL){
+            printf("\n\n\n NO routing entry FOR, %d,%d,%d\n\n\n\n", entry->destination, source_table_mip, entry->cost);
+        }
+//        printf("existant_entry, %d,%d,%d\n", existant_entry->destination, existant_entry->next_hop, existant_entry->cost);
+
+        if ((existant_entry != NULL) && (existant_entry->cost >= (entry->cost + 1))) {
+            printf("overriding routing entry, %d,%d,%d\n", existant_entry->destination, source_table_mip, entry->cost);
+
+            existant_entry->cost    = entry->cost + 1;
             existant_entry->next_hop = source_table_mip;
-        } else {
+        } else if (existant_entry == NULL) {
+//            if ( ){
+//            printf("Previous COST vs current COST, %d,%d,%d\n", entry->destination, existant_entry->cost, entry->cost + 1);
+//            } else {
+//                printf("ENTRY FOR %d DOESN'T EXIST? \n", entry->destination);
+//            }
             printf("adding routing entry, %d,%d,%d\n", entry->destination, source_table_mip, entry->cost + 1);
             add_routing_tableEntry(table, entry->destination, source_table_mip, entry->cost + 1);
+            if (table->size != MAX_ENTRIES)
             notify_change_table(table, source_table_mip);
         }
     }

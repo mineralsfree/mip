@@ -128,7 +128,7 @@ def init_he2(self, line):
 
     # Make sure that the MIP and Routing daemons are ready and the topology
     # is converged
-    time.sleep(10000)
+    time.sleep(10)
 
     terms.append(openTerm(self,
                           node=E,
@@ -142,7 +142,7 @@ def init_he2(self, line):
                           node=A,
                           title="CLIENT [A]",
                           geometry="38x20+555+583",
-                          cmd="./ping_client 50 \"Hello from A\" usockA"))
+                          cmd="./ping_client usockA 50 \"Hello from A\""))
 
     time.sleep(3)
 
@@ -150,7 +150,7 @@ def init_he2(self, line):
                           node=C,
                           title="CLIENT [C]",
                           geometry="38x20+555+583",
-                          cmd="./ping_client 50 \"Hello from C\" usockC"))
+                          cmd="./ping_client usockC 50 \"Hello from C\""))
 
     time.sleep(30)
 
@@ -164,7 +164,7 @@ def init_he2(self, line):
                           node=A,
                           title="CLIENT [A]",
                           geometry="38x20+555+583",
-                          cmd="./ping_client 50 \"Hello from A\" usockA"))
+                          cmd="./ping_client usockA 50 \"Hello from A\""))
 
     # Bring the link up again. The network should converge again and use
     # A - B - D - E as the shortest path
@@ -174,7 +174,7 @@ def init_he2(self, line):
                           node=A,
                           title="CLIENT [A]",
                           geometry="38x20+555+583",
-                          cmd="./ping_client 50 \"Hello from A\" usockA"))
+                          cmd="./ping_client usockA 50 \"Hello from A\" "))
 
 
 # Mininet Callbacks

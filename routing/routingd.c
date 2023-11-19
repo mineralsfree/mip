@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_un addr;
     struct routing_table rt;
     int sd, rc;
-    char *socketLower = argv[argc-1];
+    char *socketLower = argv[argc - 1];
     char id_buf[1];
     char buff[245];
     char buf[245];
@@ -69,23 +69,22 @@ int main(int argc, char *argv[]) {
             break;
         } else {
             uint8_t source_addr = (uint8_t) buff[0];
-
             printf("RECIEVED: %s of length %lu from %d\n", buff, strlen(buff), source_addr);
-
             if (buff[1] == 'R' && buff[2] == 'E' && buff[3] == 'Q') {
-                printf("RECIEVED: REQUEST REQUEST\n");
-
                 uint8_t dst_addr = (uint8_t) buff[4];
+                printf("RECIEVED: REQUEST to NODE %d\n",dst_addr);
                 struct routing_table_entry *entry = getRoutingTableEntry(&rt, dst_addr);
+                char buffer[254];
+                memset(buf, 0, sizeof(buf));
+                char upd[] = "RES";
+                strcpy(buffer + 1, upd);
+                buffer[0] = (char) dst_addr;
                 if (entry != NULL) {
-                    char buffer[254];
-                    memset(buf, 0, sizeof(buffer));
-                    char upd[] = "RES";
-                    strcpy(buffer + 1, upd);
-                    buffer[0] = (char) dst_addr;
                     buffer[4] = (char) entry->next_hop;
-                    write(sd, buffer, sizeof(buffer));
+                } else {
+                    buffer[4] = (char) 255;
                 }
+                write(sd, buffer, sizeof(buffer));
                 printf("got REQ from MIP\n");
 
             } else if (buff[1] == 'H' && buff[2] == 'E' && buff[3] == 'L') {
@@ -94,20 +93,6 @@ int main(int argc, char *argv[]) {
                 send_table(&rt, source_addr);
                 add_routing_tableEntry(&rt, source_addr, source_addr, 1);
                 notify_change_table(&rt, source_addr);
-//                char* resp;
-//                resp = serialize_routing_table(&rt);
-//                printf("RESP: %s\n",resp);
-//                char upd[] = "UPD";
-//                memset(buf, 0, sizeof(buf));
-//
-//                strcat(upd, resp);
-//                strcpy(buf + 1, upd);
-//                buf[0] = (char) source_addr;
-//
-//
-//                printf("REPLYING WITH TABLE: %s\n", buf);
-//
-//                write(sd,buf, strlen(buf));
 
             } else if (buff[1] == 'U' && buff[2] == 'P' && buff[3] == 'D') {
                 uint8_t source_addr = (uint8_t) buff[0];

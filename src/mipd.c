@@ -158,10 +158,12 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                                            MIP_TYPE_ROUTING, i);
                     }
                 } else if (temp_str[1] == 'U' && temp_str[2] == 'P' && temp_str[3] == 'D') {
-                    printf("\n\n\n\n\nSENDING UPD REQUEST RESPONSE: %s\n\n\n", routing_local_buf);
                     int dst_mip_address = (int) (unsigned char) routing_local_buf[0];
+                    printf("\n\n\n\n\nSENDING UPD REQUEST RESPONSE: %s TO %d\n\n\n", routing_local_buf, dst_mip_address);
+
                     routing_local_buf[0] = (char) local_if.local_mip_addr;
                     struct arp_entry entry = local_if.arp_table.entries[dst_mip_address];
+
                     send_mip_packet_v2(&local_if, local_if.addr[entry.interfaceIndex].sll_addr,
                                        entry.hw_addr,
                                        local_if.local_mip_addr, dst_mip_address, (uint8_t *) routing_local_buf,
