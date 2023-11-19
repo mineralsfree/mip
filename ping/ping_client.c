@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
 //    int max_microseconds = 1000000;
 //    int random_microseconds = (rand() % (max_microseconds - min_microseconds + 1)) + min_microseconds;
 //    usleep(random_microseconds);
+//    usleep(10000);  // Sleep for 10ms
 
 
     int opt, hflag = 0;
@@ -78,6 +79,7 @@ int main(int argc, char *argv[]) {
     strcat(ping, argv[argc - 1]);
     strcpy(buf + 1, ping);
     buf[0] = (char) mip_addr;
+//    buf[0] = (char) 0x02;
     char *socketLower = argv[argc - 3];
     char lock_file[50];
     strcpy(lock_file, socketLower);
@@ -107,14 +109,25 @@ int main(int argc, char *argv[]) {
     tv.tv_usec = 0;
     setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, (const char *) &tv, sizeof tv);
     rc = connect(sd, (struct sockaddr *) &addr, sizeof(addr));
-    printf("Client: sending %s, to node with MIP address %ld\n", argv[argc-1], mip_addr);
-    fflush(stdout);
     if (rc < 0) {
         perror("connect");
         close(sd);
         release_lock(lock_file);
         exit(EXIT_FAILURE);
     }
+    printf("Client: sending Identification code (0x02) to MIP daemon\n");
+    char id_buf[1];
+    id_buf[0] = 0x02;
+
+    rc = write(sd, id_buf, 1);
+    if (rc < 0) {
+        perror("sending id code");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Client: sending %s, to node with MIP address %ld\n", argv[argc-1], mip_addr);
+    fflush(stdout);
+
 
 
     rc = write(sd, buf, 256);

@@ -1,14 +1,16 @@
 #include  <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifndef V2IMPL_MIP_H
 #define V2IMPL_MIP_H
-#include <stddef.h>
 
 
 #define MAX_CONNS 1
 #define MIP_TYPE_ARP 0x01
 #define MIP_TYPE_PING 0x02
+#define MIP_TYPE_ROUTING 0x04
+
 #define ARP_REQ 0x00
 #define ARP_RES 0x01
 

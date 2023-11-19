@@ -31,15 +31,28 @@ int main(int argc, char* argv[]){
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, socketUpper, sizeof(addr.sun_path) - 1);
-
     rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
-    printf("Connected to unix socket %s\n", socketUpper);
-    fflush(stdout);
     if ( rc < 0) {
         perror("connect");
         close(sd);
         exit(EXIT_FAILURE);
     }
+    printf("Connected to unix socket %s\n", socketUpper);
+    printf("Client: sending Identification code (0x02) to MIP daemon\n");
+    char id_buf[1];
+    id_buf[0] = 0x02;
+
+    rc = write(sd, id_buf, 1);
+//    usleep(10000000);  // Sleep for 100ms
+//    usleep(10000000);  // Sleep for 100ms
+
+    if (rc < 0) {
+        perror("sending id code");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    fflush(stdout);
+
     // Receive and print the server's response
     while(1){
         rc = read(sd, buf, sizeof(buf) - 1);
@@ -58,7 +71,6 @@ int main(int argc, char* argv[]){
             buf[2] = 'O';
             printf("Sending: '%s' to %d, message length: %d\n", buf+1, dst_mip_address, rc);
             write(sd, buf, 256);
-
         }
     }
 

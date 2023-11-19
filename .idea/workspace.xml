@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="CMakeRunConfigurationManager">
-    <generated />
+    <generated>
+      <config projectName="150020" targetName="all" />
+      <config projectName="150020" targetName="install" />
+      <config projectName="150020" targetName="ping_server" />
+      <config projectName="150020" targetName="routing_d" />
+      <config projectName="150020" targetName="ping_client" />
+      <config projectName="150020" targetName="mipd" />
+    </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
@@ -13,22 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82f60ea1-9a5c-47d4-aa66-2f8798e28479" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/.gdb_history" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/exe.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/he1-mn-topo.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/mipd" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mipd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/peda-session-ping_client.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ping_client" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ping_client" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ping_server" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ping_server" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/main.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/mip_arp.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/mip_arp.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/mip_pdu.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/mipd.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/mipd.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/utils.o" beforeDir="false" afterPath="$PROJECT_DIR$/build/utils.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/ether.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/ether.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/mipd.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/mipd.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/routing_layer.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/routing_layer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/utils.h" beforeDir="false" afterPath="$PROJECT_DIR$/include/utils.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ping/ping_client.c" beforeDir="false" afterPath="$PROJECT_DIR$/ping/ping_client.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ping/ping_server.c" beforeDir="false" afterPath="$PROJECT_DIR$/ping/ping_server.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routing/routing_table.c" beforeDir="false" afterPath="$PROJECT_DIR$/routing/routing_table.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routing/routingd.c" beforeDir="false" afterPath="$PROJECT_DIR$/routing/routingd.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mip_arp.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/mip_arp.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mipd.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/mipd.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.c" afterDir="false" />
@@ -70,9 +73,17 @@
         </entry>
       </map>
     </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
+      </map>
+    </option>
   </component>
   <component name="OCResolveContextSettings">
     <option name="configuration" value="$PROJECT_DIR$/src/mipd.c" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -92,23 +103,115 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/mikita/UIO/NET/homeex/150020&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/mikita/UIO/NET/homeex/150020/bin&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;aDefault&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.splitter.proportion&quot;: &quot;0.35080644&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/bin" />
       <recent name="$PROJECT_DIR$" />
     </key>
+  </component>
+  <component name="RunManager" selected="Makefile Target.all">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="all" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="all" CONFIG_NAME="all" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="install" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="install" CONFIG_NAME="install" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="mipd" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="mipd" CONFIG_NAME="mipd" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ping_client" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="ping_client" CONFIG_NAME="ping_client" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ping_server" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="ping_server" CONFIG_NAME="ping_server" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="routing_d" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="routing_d" CONFIG_NAME="routing_d" version="1">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Unnamed" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" EXPLICIT_BUILD_TARGET_NAME="all">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="routingd.c" type="CppFileRunConfiguration" factoryName="CppFileRunConfiguration" temporary="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="150020" TARGET_NAME="routingd.c" CONFIG_NAME="routingd.c">
+      <option name="sourceFile" value="routing/routingd.c" />
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.runfile.CppFileBuildBeforeRunTaskProvider$BasicBuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Makefile" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="install" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="install" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="C/C++ File.routingd.c" />
+      <item itemvalue="CMake Application.Unnamed" />
+      <item itemvalue="Makefile Application.all" />
+      <item itemvalue="Makefile Application.install" />
+      <item itemvalue="Makefile Application.mipd" />
+      <item itemvalue="Makefile Application.ping_client" />
+      <item itemvalue="Makefile Application.ping_server" />
+      <item itemvalue="Makefile Application.routing_d" />
+      <item itemvalue="Makefile Target.all" />
+      <item itemvalue="Makefile Target.install" />
+      <item itemvalue="Makefile Target.Makefile" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Makefile Target.all" />
+        <item itemvalue="C/C++ File.routingd.c" />
+        <item itemvalue="Makefile Target.install" />
+        <item itemvalue="Makefile Target.Makefile" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -133,6 +236,13 @@
       <workItem from="1697031528086" duration="865000" />
       <workItem from="1697207255449" duration="4740000" />
       <workItem from="1697297661786" duration="599000" />
+      <workItem from="1697480932284" duration="2000" />
+      <workItem from="1697548535631" duration="5000" />
+      <workItem from="1697555980665" duration="377000" />
+      <workItem from="1700316932349" duration="4577000" />
+      <workItem from="1700321909848" duration="9022000" />
+      <workItem from="1700331021865" duration="26441000" />
+      <workItem from="1700362165679" duration="769000" />
     </task>
     <servers />
   </component>
@@ -149,5 +259,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

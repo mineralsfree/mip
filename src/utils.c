@@ -143,6 +143,36 @@ int send_unix_buff(int sd, int src_mip, char *str) {
     return rc;
 }
 
+int send_routing_buff(int sd, int src_mip, int *buff) {
+    int rc;
+    char buf[256];
+//    memset(buf, 0, sizeof(buf));
+//    memset(buf, src_mip, 1);
+//    strcpy(buf + 1, str);
+//    printf("sending %s, to unix socket %d, message Length: %lu\n", str, sd, strlen(str) + 1);
+    fflush(stdout);
+    rc = write(sd, buff, 256);
+    if (rc < 0) {
+        perror("write");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    return rc;
+}
+
+int send_routing_request(int sd, uint8_t dst_mip, uint8_t src_mip){
+    int rc;
+    char req[] = "REQ";
+    char buf[254];
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf + 1, req);
+    buf[0] = (char) src_mip;
+    buf[4] = (char) dst_mip;
+//    printf("SENDING from %d to %d content %s\n", src_mip,dst_mip, buf);
+    rc = write(sd, buf, sizeof(buf));
+    return rc;
+}
+
 /**
  * Prints information from a message header (struct msghdr).
  *
@@ -163,9 +193,10 @@ void printMsgInfo(struct msghdr *msg) {
     printf("  Source MIP Address: %u\n", mip_hdr->src);
     printf("  Destination MIP Address: %u\n", mip_hdr->dst);
     printf("  SDU Length: %u\n", mip_hdr->sdu_l);
-    printf("  SDU Type: %u (%s)\n", mip_hdr->sdu_t, (mip_hdr->sdu_t == 1) ? "MIP-ARP" : "PING");
+    printf("  SDU Type: %u (%s)\n", mip_hdr->sdu_t, (mip_hdr->sdu_t == 1) ? "MIP-ARP" : (mip_hdr->sdu_t == 2) ?  "PING": "ROUTING");
     printf("  TTL: %u\n", mip_hdr->ttl);
 }
+
 /**
  * Handles incoming MIP packets.
  *
@@ -236,7 +267,10 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
                                (uint8_t *) sdu, MIP_TYPE_ARP, interfaceIndex);
         } else if (sdu->type == ARP_RES) {
             add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, sdu->addr, interfaceIndex);
-            if (ifs->pendingPackets[mip_hdr.src] != NULL && (uint8_t) ifs->pendingPackets[mip_hdr.src][0] == sdu->addr) {
+            printf("\n\n\nARP RES DESTINGATION JPST: %d, pending pack: %s, pending ADDR: %d\n", mip_hdr.src,
+                   ifs->pendingPackets[mip_hdr.src], ifs->pendingPackets[mip_hdr.src][0]);
+            if (ifs->pendingPackets[mip_hdr.src] != NULL &&
+                (uint8_t) ifs->pendingPackets[mip_hdr.src][0] == sdu->addr) {
                 send_mip_packet_v2(ifs, ifs->addr[interfaceIndex].sll_addr, frame_hdr.src_mac, ifs->local_mip_addr,
                                    mip_hdr.src,
                                    (uint8_t *) ifs->pendingPackets[mip_hdr.src] + 1, MIP_TYPE_PING, interfaceIndex);
@@ -245,7 +279,42 @@ int handle_mip_packet_v2(struct ifs_data *ifs) {
 
         }
     } else if (mip_hdr.sdu_t == MIP_TYPE_PING) {
-        send_unix_buff(ifs->usock, mip_hdr.src, (char *) packet);
+        printf("\n\n\nMIP_TYPE_PING REQEUST RECIEVED %s \n\n\n",(char *) packet );
+
+        if (ifs->local_mip_addr == mip_hdr.dst){
+            send_unix_buff(ifs->usock, mip_hdr.src, (char *) packet);
+        } else {
+            printf("\n\n\nRESENDING  PING REQUEST \n\n\n");
+
+            ifs->pendingPackets[mip_hdr.dst] =  packet;
+            printf("Before memcpy\n");
+//            strcpy(ifs->pending_packets[mip_hdr.dst].packet, (const char*)packet);
+            memcpy(ifs->pending_packets[mip_hdr.dst].packet,  packet, 255);
+            ifs->pending_packets[mip_hdr.dst].src_mip = mip_hdr.src;
+            send_routing_request(ifs->routing_sock, mip_hdr.dst, ifs->local_mip_addr);
+
+            printf("\n\n\n\n\nMIP_TYPE_PING CACHED: %s\n\n\n", (char * )ifs->pending_packets[mip_hdr.dst].packet);
+            printf("\n\n\n\n\n MIP_TYPE_PING DATA CACHE LENGTH: %lu  \n\n\n", strlen((char * )ifs->pending_packets[mip_hdr.dst].packet));
+            printf("\n\n\n\n\n MIP_TYPE_PING DST HOST: %d  \n\n\n", mip_hdr.dst);
+            printf("After memcpy\n");
+            fflush(stdout);
+        }
+    } else if (mip_hdr.sdu_t == MIP_TYPE_ROUTING) {
+        add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, mip_hdr.src, interfaceIndex);
+
+        send_routing_buff(ifs->routing_sock, mip_hdr.src, (int *) packet);
+//
+//        add_arp_entry(&ifs->arp_table, frame_hdr.src_mac, mip_hdr.src, interfaceIndex);
+//        struct route_sdu *sdu = (struct route_sdu *) malloc(sizeof(struct route_sdu));
+//        memcpy(sdu, packet, sizeof(struct route_sdu));
+//
+//        if (sdu->type == ROUTING_HELLO){
+//
+//        } else if (sdu->type == ROUTING_UPDATE){
+//        }
+//
+
+
     }
     printf("\n Recieving MIP packet \n");
     printMsgInfo(&msg);
@@ -311,11 +380,13 @@ int send_mip_packet_v2(struct ifs_data *ifs,
         length = sizeof(struct mip_arp_sdu);
     } else if (sdu_t == MIP_TYPE_PING) {
         length = strlen((const char *) packet) + 1;
+    } else if (sdu_t == MIP_TYPE_ROUTING) {
+        length = strlen((const char *) packet) + 1;
     } else {
         perror("wrong_mip_sdu_t");
         return -1;
     }
-    mip_hdr.sdu_l = ceil(length/4);
+    mip_hdr.sdu_l = ceil(length / 4);
     msgvec[2].iov_len = length;
 
     /* Allocate a zeroed-out message info struct */

@@ -68,4 +68,3 @@ struct mip_arp_sdu *fill_arp_sdu(uint8_t mip_addr){
     sdu->addr = mip_addr;
     return sdu;
 }
-
