@@ -7,7 +7,8 @@
 #include "utils.h"
 
 #define MIP_MAX_ENTRIES 255
-
+//TODO: TEST 1
+#define ARP_DEFAULT_TTL 2
 
 struct mip_arp_sdu *fill_arp_sdu(uint8_t mip_addr);
 void add_arp_entry(struct arp_table *table, uint8_t *hw_addr, uint8_t mip_addr, int interfaceIndex);

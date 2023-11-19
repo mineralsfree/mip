@@ -11,7 +11,7 @@
 #include <errno.h>
 
 #define TIMEOUT 1
-
+#define TTL 0x05
 
 
 int is_program_already_running(char* lock_file) {
@@ -77,8 +77,9 @@ int main(int argc, char *argv[]) {
     memset(buf, 0, sizeof(buf));
 
     strcat(ping, argv[argc - 1]);
-    strcpy(buf + 1, ping);
+    strcpy(buf + 2, ping);
     buf[0] = (char) mip_addr;
+    buf[1] = TTL;
 //    buf[0] = (char) 0x02;
     char *socketLower = argv[argc - 3];
     char lock_file[50];

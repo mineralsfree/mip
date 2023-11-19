@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
                 struct routing_table_entry *entry = getRoutingTableEntry(&rt, dst_addr);
                 char buffer[254];
                 memset(buf, 0, sizeof(buf));
-                char upd[] = "RES";
-                strcpy(buffer + 1, upd);
+                char upd[] = "RSP";
+                strcpy(buffer +  1, upd);
                 buffer[0] = (char) dst_addr;
                 if (entry != NULL) {
                     buffer[4] = (char) entry->next_hop;
@@ -85,7 +85,6 @@ int main(int argc, char *argv[]) {
                     buffer[4] = (char) 255;
                 }
                 write(sd, buffer, sizeof(buffer));
-                printf("got REQ from MIP\n");
 
             } else if (buff[1] == 'H' && buff[2] == 'E' && buff[3] == 'L') {
                 printf("got HELLO message\n");
@@ -96,7 +95,7 @@ int main(int argc, char *argv[]) {
 
             } else if (buff[1] == 'U' && buff[2] == 'P' && buff[3] == 'D') {
                 uint8_t source_addr = (uint8_t) buff[0];
-                printf("got UPD from MIP: %s\n", buff);
+//                printf("got UPD from MIP: %s\n", buff);
                 if (!getRoutingTableEntry(&rt, source_addr)) {
                     add_routing_tableEntry(&rt, source_addr, source_addr, 1);
                 }

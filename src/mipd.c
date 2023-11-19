@@ -98,6 +98,10 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                     continue;
                 }
                 int dst_mip_address = (int) (unsigned char) unix_incom_buf[0];
+                int ttl = (int) (unsigned char) unix_incom_buf[1];
+                if (ttl == 0){
+                    ttl = DEFAULT_TTL;
+                }
                 send_routing_request(local_if.routing_sock, dst_mip_address, local_if.local_mip_addr);
 //                printf("\nWRITTEN;%d\n", a);
 //                printf("\nlocal arp table mip: %d  =  value: %d\n",dst_mip_address, local_if.arp_table.entries[dst_mip_address].mip_addr );
@@ -113,6 +117,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                 local_if.pendingPackets[dst_mip_address] = (uint8_t *) unix_incom_buf;
                 memcpy(local_if.pending_packets[dst_mip_address].packet , (uint8_t *) unix_incom_buf, sizeof(unix_incom_buf));
                 local_if.pending_packets[dst_mip_address].src_mip = local_if.local_mip_addr;
+                local_if.pending_packets[dst_mip_address].ttl = ttl;
 //                    uint8_t broadcast[] = ETH_DST_MAC;
 //                    for (int i = 0; i < local_if.ifn; ++i) {
 //                        uint8_t *packet = (uint8_t *) fill_arp_sdu(dst_mip_address);
@@ -128,19 +133,19 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                     continue;
                 }
                 char *temp_str = (char *) routing_local_buf;
-                if (temp_str[1] == 'R' && temp_str[2] == 'E' && temp_str[3] == 'S') {
+                if (temp_str[1] == 'R' && temp_str[2] == 'S' && temp_str[3] == 'P') {
                     int next_hop = (int) (unsigned char) routing_local_buf[4];
                     int dst_host = (int) (unsigned char) routing_local_buf[0];
                     if (local_if.pending_packets[dst_host].packet[0] != 0) {
                         struct arp_entry entry = local_if.arp_table.entries[next_hop];
                         printf("\n\n\n\n\nRESENDING CACHED: %s\n\n\n", (char * )local_if.pending_packets[dst_host].packet);
-                        printf("\n\n\n\n\nDATA CACHE LENGTH: %lu  \n\n\n", strlen((char * )local_if.pending_packets[dst_host].packet));
-                        printf("\n\n\n\n\nDST HOST: %d  \n\n\n", dst_host);
+//                        printf("\n\n\n\n\nDATA CACHE LENGTH: %lu  \n\n\n", strlen((char * )local_if.pending_packets[dst_host].packet));
+                        printf("\n\n\n\n\nDST HOST: %d, TTL: %d  \n\n\n", dst_host, local_if.pending_packets[dst_host].ttl );
 
                         send_mip_packet_v2(&local_if, local_if.addr[entry.interfaceIndex].sll_addr,
                                            entry.hw_addr,
                                            local_if.pending_packets[dst_host].src_mip, dst_host, (uint8_t *) local_if.pending_packets[dst_host].packet,
-                                           MIP_TYPE_PING, entry.interfaceIndex);
+                                           MIP_TYPE_PING, entry.interfaceIndex, local_if.pending_packets[dst_host].ttl-1);
                         local_if.pending_packets[dst_host].packet[0]=0;
                         local_if.pending_packets[dst_host].src_mip = -1;
 
@@ -155,7 +160,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
 
                         send_mip_packet_v2(&local_if, local_if.addr[i].sll_addr, broadcast,
                                            local_if.local_mip_addr, 255, (uint8_t *) routing_local_buf,
-                                           MIP_TYPE_ROUTING, i);
+                                           MIP_TYPE_ROUTING, i, 1);
                     }
                 } else if (temp_str[1] == 'U' && temp_str[2] == 'P' && temp_str[3] == 'D') {
                     int dst_mip_address = (int) (unsigned char) routing_local_buf[0];
@@ -167,7 +172,7 @@ void mipd(char *unix_path, uint8_t mip_addr) {
                     send_mip_packet_v2(&local_if, local_if.addr[entry.interfaceIndex].sll_addr,
                                        entry.hw_addr,
                                        local_if.local_mip_addr, dst_mip_address, (uint8_t *) routing_local_buf,
-                                       MIP_TYPE_ROUTING, entry.interfaceIndex);
+                                       MIP_TYPE_ROUTING, entry.interfaceIndex, 1);
                 }
 
 //                printf("ROUTING");w

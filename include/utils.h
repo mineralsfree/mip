@@ -23,6 +23,7 @@ struct arp_table {
 struct pending_packets_entry {
     uint8_t src_mip;
     uint8_t packet[255];
+    uint8_t ttl;
 };
 struct ifs_data {
     struct sockaddr_ll addr[MAX_IF];
@@ -50,7 +51,7 @@ int send_mip_packet_v2(struct ifs_data *ifs,
                        uint8_t src_mip_addr,
                        uint8_t dst_mip_addr,
                        uint8_t *packet,
-                       uint8_t sdu_t, int interfaceIndex);
+                       uint8_t sdu_t, int interfaceIndex, int ttl);
 
 
 void init_ifs(struct ifs_data *, int rsock);

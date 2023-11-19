@@ -128,7 +128,7 @@ def init_he2(self, line):
 
     # Make sure that the MIP and Routing daemons are ready and the topology
     # is converged
-    time.sleep(10)
+    time.sleep(5)
 
     terms.append(openTerm(self,
                           node=E,
@@ -145,36 +145,36 @@ def init_he2(self, line):
                           cmd="./ping_client usockA 50 \"Hello from A\""))
 
     time.sleep(3)
-
-    terms.append(openTerm(self,
-                          node=C,
-                          title="CLIENT [C]",
-                          geometry="38x20+555+583",
-                          cmd="./ping_client usockC 50 \"Hello from C\""))
-
-    time.sleep(30)
-
-    # After 30 sec. fail the link betwen node B and D for 20 sec.
-    # DVR should be able to find another shortest path and reroute the packets
-    # from A to E through C
-
-    net.configLinkStatus('B', 'D','down')
-    time.sleep(20)
-    terms.append(openTerm(self,
-                          node=A,
-                          title="CLIENT [A]",
-                          geometry="38x20+555+583",
-                          cmd="./ping_client usockA 50 \"Hello from A\""))
-
-    # Bring the link up again. The network should converge again and use
-    # A - B - D - E as the shortest path
-    net.configLinkStatus('B', 'D','up')
-    time.sleep(20)
-    terms.append(openTerm(self,
-                          node=A,
-                          title="CLIENT [A]",
-                          geometry="38x20+555+583",
-                          cmd="./ping_client usockA 50 \"Hello from A\" "))
+    #
+    # terms.append(openTerm(self,
+    #                       node=C,
+    #                       title="CLIENT [C]",
+    #                       geometry="38x20+555+583",
+    #                       cmd="./ping_client usockC 50 \"Hello from C\""))
+    #
+    # time.sleep(30)
+    #
+    # # After 30 sec. fail the link betwen node B and D for 20 sec.
+    # # DVR should be able to find another shortest path and reroute the packets
+    # # from A to E through C
+    #
+    # net.configLinkStatus('B', 'D','down')
+    # time.sleep(20)
+    # terms.append(openTerm(self,
+    #                       node=A,
+    #                       title="CLIENT [A]",
+    #                       geometry="38x20+555+583",
+    #                       cmd="./ping_client usockA 50 \"Hello from A\""))
+    #
+    # # Bring the link up again. The network should converge again and use
+    # # A - B - D - E as the shortest path
+    # net.configLinkStatus('B', 'D','up')
+    # time.sleep(20)
+    # terms.append(openTerm(self,
+    #                       node=A,
+    #                       title="CLIENT [A]",
+    #                       geometry="38x20+555+583",
+    #                       cmd="./ping_client usockA 50 \"Hello from A\" "))
 
 
 # Mininet Callbacks
